@@ -5,7 +5,7 @@ POST {{url_dev}}/shop/signup
 Content-Type: application/json
 
 {
-    "name": "GoongShop1",
-    "email": "goon1g@gmail.com",
+    "name": "goongstore",
+    "email": "goong@gmail.com",
     "password": "123456"
 }
