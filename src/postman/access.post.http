@@ -1,11 +1,12 @@
-@url_dev=http://localhost:3052/v1/api/
+@url_dev=http://localhost:3052/v1/api
 ### signup
 
 POST {{url_dev}}/shop/signup
 Content-Type: application/json
+x-api-key: 83238fd6e4630ec4ea74a2ab1ed713086f6250aa26e5070922ee693854c81613976fa6c353bd18c9a6cd93e7f16f9dcf9e288b36d7f0f92f7ad213be8684a1c1
 
 {
-    "name": "goongstore",
-    "email": "goong@gmail.com",
+    "name": "goonzg",
+    "email": "goong_shop@gmail.vn",
     "password": "123456"
 }

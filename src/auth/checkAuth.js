@@ -11,7 +11,7 @@ const apiKey = async (req, res, next) => {
     const key = req.headers[HEADER.API_KEY]?.toString();
     if (!key) {
       return res.status(403).json({
-        message: "forbidden error",
+        message: "forbidden error, provide API KEY",
       });
     }
     // check objKey
@@ -21,11 +21,37 @@ const apiKey = async (req, res, next) => {
         message: "Forbidden Error",
       });
     }
-    req.objKey = objKey;
+    req.objectKey = objectKey;
     return next();
-  } catch (error) {}
+  } catch (error) {
+    console.log(error);
+  }
 };
 
+const permissions = (permission) => {
+  return (req, res, next) => {
+    if (!req.objectKey.permissions) {
+      return res.status(403).json({
+        message: "Permission Denied",
+      });
+    }
+    const validPermission = req.objectKey.permissions.includes(permission);
+    if (!validPermission) {
+      return res.status(403).json({
+        message: "Permission Denied",
+      });
+    }
+    return next();
+  };
+};
+
+const asyncHandler = (callback) => {
+  return (req, res, next) => {
+    callback(req, res, next).catch(next);
+  };
+};
 module.exports = {
   apiKey,
+  permissions,
+  asyncHandler,
 };
