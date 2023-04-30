@@ -6,7 +6,8 @@ const crypto = require("node:crypto");
 const KeyTokenService = require("./keyToken.service");
 const { createTokenPair } = require("../auth/authUtils");
 const { getInfoData } = require("../utils");
-const { BadRequestError } = require("../core/error.response");
+const { BadRequestError, AuthFailureError } = require("../core/error.response");
+const ShopService = require("./shop.service");
 const RoleShop = {
   SHOP: "SHOP",
   WRITER: "WRITER",
@@ -15,6 +16,46 @@ const RoleShop = {
 };
 
 class AccessService {
+  static logout = async ({ email, password, refreshToken = null }) => {};
+  static login = async ({ email, password, refreshToken = null }) => {
+    /*
+      1. check email db
+      2. match password
+      3. create accesstoken va refresh token 
+      4. generate token
+      5. get data return login
+    */
+    //  1.
+    const foundShop = await ShopService.findByEmail({ email });
+    if (!foundShop) {
+      throw new BadRequestError("Shop not registered");
+    }
+    // 2.
+    const matchPassword = bcrypt.compare(password, foundShop.password);
+    if (!matchPassword) throw new AuthFailureError("Authentication Error");
+    // 3.
+    const privateKey = crypto.randomBytes(64).toString("hex");
+    const publicKey = crypto.randomBytes(64).toString("hex");
+    const tokens = await createTokenPair(
+      { userId: foundShop._id, email },
+      publicKey,
+      privateKey
+    );
+    await KeyTokenService.createKeyToken({
+      userId: foundShop._id,
+      refreshToken: tokens.refreshToken,
+      privateKey,
+      publicKey,
+    });
+    return {
+      shop: getInfoData({
+        fields: ["_id", "name", "email"],
+        object: foundShop,
+      }),
+      tokens,
+    };
+  };
+
   static signUp = async ({ name, email, password }) => {
     // 1. check ton tai email
     // .lean() giup nhanh hon
@@ -68,14 +109,11 @@ class AccessService {
       );
 
       return {
-        code: 201,
-        metadata: {
-          shop: getInfoData({
-            fields: ["_id", "name", "email"],
-            object: newShop,
-          }),
-          tokens,
-        },
+        shop: getInfoData({
+          fields: ["_id", "name", "email"],
+          object: newShop,
+        }),
+        tokens,
       };
     }
     return {

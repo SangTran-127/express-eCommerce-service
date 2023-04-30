@@ -1,5 +1,6 @@
 "use strict";
 const jwt = require("jsonwebtoken");
+const { asyncHandler } = require("../helpers/asyncHandler");
 
 const createTokenPair = async (payload, publicKey, privateKey) => {
   try {
@@ -23,6 +24,8 @@ const createTokenPair = async (payload, publicKey, privateKey) => {
     return { accessToken, refreshToken };
   } catch (error) {}
 };
+
+const authentication = asyncHandler();
 
 module.exports = {
   createTokenPair,
