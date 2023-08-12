@@ -10,3 +10,39 @@ x-api-key: 83238fd6e4630ec4ea74a2ab1ed713086f6250aa26e5070922ee693854c81613976fa
     "email": "goong@gmail.vn",
     "password": "123456"
 }
+
+### login
+
+POST {{url_dev}}/shop/login
+Content-Type: application/json
+x-api-key: 83238fd6e4630ec4ea74a2ab1ed713086f6250aa26e5070922ee693854c81613976fa6c353bd18c9a6cd93e7f16f9dcf9e288b36d7f0f92f7ad213be8684a1c1
+
+{
+    "name": "goonzg",
+    "email": "goong@gmail.vn",
+    "password": "123456"
+}
+
+
+### logout 
+
+POST {{url_dev}}/shop/logout
+Content-Type: application/json
+x-api-key: 83238fd6e4630ec4ea74a2ab1ed713086f6250aa26e5070922ee693854c81613976fa6c353bd18c9a6cd93e7f16f9dcf9e288b36d7f0f92f7ad213be8684a1c1
+x-client-id: 644d50a358c7257b46115685
+authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NDRkNTBhMzU4YzcyNTdiNDYxMTU2ODUiLCJlbWFpbCI6Imdvb25nQGdtYWlsLnZuIiwiaWF0IjoxNjg5Nzc5ODQzLCJleHAiOjE2ODk5NTI2NDN9.SRS5x1Bo9eCsCjjIhNfhcSu921jTHgn_rqXLLRGhNU4
+
+{
+    "name": "goonzg",
+    "email": "goong@gmail.vn",
+    "password": "123456"
+}
+
+
+### handlerRefreshToken 
+
+POST {{url_dev}}/shop/handlerRefreshToken
+Content-Type: application/json
+x-api-key: 83238fd6e4630ec4ea74a2ab1ed713086f6250aa26e5070922ee693854c81613976fa6c353bd18c9a6cd93e7f16f9dcf9e288b36d7f0f92f7ad213be8684a1c1
+x-client-id: 644d50a358c7257b46115685
+x-rtoken-id: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NDRkNTBhMzU4YzcyNTdiNDYxMTU2ODUiLCJlbWFpbCI6Imdvb25nQGdtYWlsLnZuIiwiaWF0IjoxNjg5ODEzNTEyLCJleHAiOjE2OTA0MTgzMTJ9.PKPd-Cno7-CIBEejZhLaF7TSaX83oDfQOqFNebCz7mA

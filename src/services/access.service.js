@@ -4,9 +4,13 @@ const shopModel = require("../models/shop.model");
 const bcrypt = require("bcrypt");
 const crypto = require("node:crypto");
 const KeyTokenService = require("./keyToken.service");
-const { createTokenPair } = require("../auth/authUtils");
+const { createTokenPair, verifyJWT } = require("../auth/authUtils");
 const { getInfoData } = require("../utils");
-const { BadRequestError, AuthFailureError } = require("../core/error.response");
+const {
+  BadRequestError,
+  AuthFailureError,
+  ForbiddenError,
+} = require("../core/error.response");
 const ShopService = require("./shop.service");
 const RoleShop = {
   SHOP: "SHOP",
@@ -16,7 +20,47 @@ const RoleShop = {
 };
 
 class AccessService {
-  static logout = async ({ email, password, refreshToken = null }) => {};
+  static handleRefreshToken = async ({ refreshToken, user, keyStore }) => {
+    const { userId, email } = user;
+
+    if (keyStore.refreshTokensUsed.includes(refreshToken)) {
+      await KeyTokenService.deleteKeyByUserId(userId);
+      throw new ForbiddenError("Something wrong happend, Re-login to use");
+    }
+    if (keyStore.refreshToken !== refreshToken) {
+      throw new AuthFailureError("Shop not registed");
+    }
+
+    const foundShop = await ShopService.findByEmail({ email });
+    if (!foundShop) {
+      throw new AuthFailureError("Shop not registed");
+    }
+    // create 1 cap moi
+    const tokens = await createTokenPair(
+      { userId, email },
+      keyStore.publicKey,
+      keyStore.privateKey
+    );
+    // update token
+    await keyStore.updateOne({
+      $set: {
+        refreshToken: tokens.refreshToken,
+      },
+      $addToSet: {
+        refreshTokensUsed: refreshToken, // add to push used token
+      },
+    });
+    return {
+      user,
+      tokens,
+    };
+  };
+
+  static logout = async ({ keyStore }) => {
+    const delKey = await KeyTokenService.removeKeyById(keyStore._id);
+    console.log(delKey);
+    return delKey;
+  };
   static login = async ({ email, password, refreshToken = null }) => {
     /*
       1. check email db

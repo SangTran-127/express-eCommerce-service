@@ -3,6 +3,4 @@ const asyncHandler = (callback) => {
     callback(req, res, next).catch(next);
   };
 };
-module.exports = {
-  asyncHandler,
-};
+module.exports = asyncHandler;
