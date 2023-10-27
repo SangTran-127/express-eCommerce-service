@@ -127,6 +127,7 @@ class DiscountService {
         select: ["product_name"],
       });
     }
+    return products;
   }
   // get all discount by shop
   static async getAllDiscountCodeByShop({ limit, page, shopId }) {
@@ -157,6 +158,11 @@ class DiscountService {
       discount_max_uses,
       discount_min_order_value,
       discount_users_used,
+      discount_start_date,
+      discount_end_date,
+      discount_max_uses_per_user,
+      discount_value,
+      discount_type,
     } = foundDiscount;
 
     if (!discount_is_active) {
@@ -166,7 +172,10 @@ class DiscountService {
       throw new NotFoundError("Discount are out");
     }
 
-    if (new Date() < new Date(start_date) || new Date() > new Date(end_date)) {
+    if (
+      new Date() < new Date(discount_start_date) ||
+      new Date() > new Date(discount_end_date)
+    ) {
       throw new BadRequestError("Discount wrong date");
     }
 
@@ -175,7 +184,7 @@ class DiscountService {
     if (discount_min_order_value > 0) {
       // get total
       totalOrder = products.reduce((acc, product) => {
-        return acc + product.quantity * product * price;
+        return acc + product.quantity * product.price;
       }, 0);
 
       if (totalOrder < discount_min_order_value) {
