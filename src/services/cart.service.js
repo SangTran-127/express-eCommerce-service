@@ -27,6 +27,7 @@ class CartService {
     };
     const updateToInsert = {
       $addToSet: { cart_products: payload },
+      $inc: { cart_count_product: 1 },
     };
     const options = { upsert: true, new: true };
     return await cartModel
@@ -48,23 +49,46 @@ class CartService {
     };
     const options = { upsert: true, new: true };
 
-    return await cartModel.findOneAndUpdate(query, update, options);
+    const updatedCart = await cartModel.findOneAndUpdate(
+      query,
+      update,
+      options
+    );
+    return updatedCart;
   }
 
   static async addToCart({ userId, product = {} }) {
+    const { productId } = product;
     const cartExisted = await cartModel.findOne({ cart_userId: userId });
     if (!cartExisted) {
       return await CartService.createUserCart({ userId, product });
     }
     // neu co gio hang nhung chua co san pham
-    if (
-      cartExisted.cart_count_product ||
-      cartExisted.cart_count_product === 0
-    ) {
+    if (cartExisted.cart_count_product === 0) {
       cartExisted.cart_products = [product];
       return await cartExisted.save();
     }
-    return await CartService.updateCartQuantity({ userId, product });
+    for (let i = 0; i < cartExisted.cart_products.length; i++) {
+      if (cartExisted.cart_products[i].productId === productId) {
+        return await CartService.updateCartQuantity({ userId, product });
+      }
+    }
+    const foundProduct = await getProductById(productId);
+    const payload = {
+      ...product,
+      name: foundProduct.product_name,
+      price: foundProduct.product_price,
+    };
+    return await cartModel.updateOne(
+      {
+        cart_userId: userId,
+        cart_state: "active",
+      },
+      {
+        $push: { cart_products: payload },
+        $inc: { cart_count_product: 1 },
+      }
+    );
   }
   // update cart
   /*

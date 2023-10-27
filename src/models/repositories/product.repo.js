@@ -95,7 +95,6 @@ const getProductById = async (productId) =>
 const findAllProduct = async ({ limit, sort, page, filter, select }) => {
   const skip = (page - 1) * limit;
   const sortBy = sort === "ctime" ? { _id: -1 } : { _id: 1 };
-  console.log(getSelectData(select));
   const products = await product
     .find(filter)
     .sort(sortBy)
