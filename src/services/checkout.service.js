@@ -5,7 +5,7 @@ const {
 } = require("../models/repositories/cart.repo");
 const { getDiscountAmount } = require("./discount.service");
 const { acquireLock, releaseLock } = require("./redis.service");
-
+const order = require("../models/order.model");
 class CheckoutService {
   /*
         {
@@ -126,7 +126,16 @@ class CheckoutService {
       );
     }
 
-    const newOrder = await order.create();
+    const newOrder = await order.create({
+      order_userId: userId,
+      order_checkout: checkout_order,
+      order_shipping: user_address,
+      order_payment: user_payment,
+      order_products: shop_order_ids_new,
+    });
+    // neu insert thanh cong remove product
+    if (newOrder) {
+    }
     return newOrder;
   }
 }
