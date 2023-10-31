@@ -2,6 +2,9 @@
 
 const redis = require("redis");
 const { promisify } = require("util");
+const {
+  reservationInventory,
+} = require("../models/repositories/inventory.repo");
 const redisClient = redis.createClient();
 
 const pexpire = promisify(redisClient.pExpire).bind(redisClient);
@@ -18,7 +21,18 @@ const acquireLock = async (productId, quantity, cartId) => {
     const result = setnxAsync(key, expireTime);
     if (result === 1) {
       // thao tac voi inventory
-      return key;
+      const isReversation = await reservationInventory({
+        productId,
+        quantity,
+        cartId,
+      });
+
+      if (isReversation) {
+        await pexpire(key, expireTime);
+        return key;
+      }
+
+      return null;
     } else {
       await new Promise((res) => setTimeout(res, 50));
     }
@@ -30,4 +44,7 @@ const releaseLock = async (keylock) => {
   return await deleteAsyncKey(keylock);
 };
 
-module.exports = {};
+module.exports = {
+  acquireLock,
+  releaseLock,
+};

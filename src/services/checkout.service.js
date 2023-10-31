@@ -4,6 +4,7 @@ const {
   checkProductInServer,
 } = require("../models/repositories/cart.repo");
 const { getDiscountAmount } = require("./discount.service");
+const { acquireLock, releaseLock } = require("./redis.service");
 
 class CheckoutService {
   /*
@@ -109,9 +110,24 @@ class CheckoutService {
       });
     // check xem vuot ton kho hay khong
     const products = shop_order_ids_new.flatMap((order) => order.item_products);
+    const acquireProduct = [];
     for (let i = 0; i < products.length; i++) {
       const { proudctId, quantity } = products[i];
+      const keyLock = await acquireLock(proudctId, quantity, cartId);
+      acquireProduct.push(keyLock ? true : false);
+      if (keyLock) {
+        await releaseLock(keyLock);
+      }
     }
+    // check co 1 san pham het hang trong store
+    if (acquireProduct.includes(false)) {
+      throw new BadRequestError(
+        "Một số sản phẩm đã được cập nhật vui lòng quay lại"
+      );
+    }
+
+    const newOrder = await order.create();
+    return newOrder;
   }
 }
 
